@@ -1,0 +1,113 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  meta(http-equiv='X-UA-Compatible' content='ie=edge')
+  link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css' integrity='sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ' crossorigin='anonymous')
+  title= "Forum"
+  link(rel='stylesheet' href='/style/main.css')
+  link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous')
+#app.container(style=' margin-top:20px;color: #1a202c;text-align: left;background-color: #e2e8f0;')
+  link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css' integrity='sha256-46r060N2LrChLLb5zowXQ72/iKKNiw/lAmygmHExk/o=' crossorigin='anonymous')
+  .container
+    .main-body.p-0
+      .inner-wrapper
+        // Inner sidebar
+        .inner-sidebar
+          // Inner sidebar header
+          .inner-sidebar-header.justify-content-center
+            button.btn.btn-primary.has-icon.btn-block(type='button' data-toggle='modal' data-target='#threadModal')
+              svg.feather.feather-plus.mr-2(xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewbox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round')
+                line(x1='12' y1='5' x2='12' y2='19')
+                line(x1='5' y1='12' x2='19' y2='12')
+              | New Room
+          // /Inner sidebar header
+          // Inner sidebar body
+          .inner-sidebar-body.p-0
+            .p-3.h-100(data-simplebar='init')
+              .simplebar-wrapper(style='margin: -16px;')
+                .simplebar-height-auto-observer-wrapper
+                  .simplebar-height-auto-observer
+                .simplebar-mask
+                  .simplebar-offset(style='right: 0px; bottom: 0px;')
+                    .simplebar-content-wrapper(style='height: 100%; overflow: hidden scroll;')
+                      .simplebar-content(style='padding: 16px;')
+                        nav.nav.nav-pills.nav-gap-y-1.flex-column(v-for="chatroom in chatrooms" :key="chatroom.id")
+                          a.nav-link.nav-link-faded.has-icon(href='javascript:void(0)' v-on:click='selectChatroom(chatroom.id)' v-bind:class="{ 'active': chatroom.id == currentRoom }") {{ chatroom.name }}
+                .simplebar-placeholder(style='width: 234px; height: 292px;')
+              .simplebar-track.simplebar-horizontal(style='visibility: hidden;')
+                .simplebar-scrollbar(style='width: 0px; display: none;')
+              .simplebar-track.simplebar-vertical(style='visibility: visible;')
+                .simplebar-scrollbar(style='height: 151px; display: block; transform: translate3d(0px, 0px, 0px);')
+                  
+        // /Inner sidebar
+        // Inner main
+        .inner-main
+          // Inner main header
+          .inner-main-header
+          // /end Inner main header
+
+
+          // Inner main body
+          // Forum List
+          .inner-main-body.p-2.p-sm-3.collapse.forum-content.show
+            button.btn-success.btn.chat(type='button' data-toggle='modal' data-target='#chatModal')
+              i(class='far fa-comment')
+            .card.mb-2(v-for='chat in chats')
+              .card-body.p-2.p-sm-3
+                .media.forum-item
+                  a(href='#' data-toggle='collapse' data-target='.forum-content')
+                    img.mr-3.rounded-circle(src='https://bootdey.com/img/Content/avatar/avatar1.png' width='50' alt='User')
+                  .media-body
+                    .name.d-flex.justify-content-between(style='width: 100%')
+                      h6
+                        a.text-body(href='#' data-toggle='collapse' data-target='.forum-content') {{ chat.user.username  }}
+                      .text-muted {{ moment(chat.send_at)  }}
+                    p.text-secondary.body
+                      | {{ chat.body }}
+
+        // /Inner main
+      
+      // New Thread Modal
+      #threadModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='threadModalLabel' aria-hidden='true')
+        .modal-dialog.modal-lg(role='document')
+          .modal-content
+            form
+              .modal-header.d-flex.align-items-center.bg-primary.text-white
+                h6#threadModalLabel.modal-title.mb-0 New Discussion
+                button.close(type='button' data-dismiss='modal' aria-label='Close')
+                  span(aria-hidden='true') &times;
+              .modal-body
+                .form-group
+                  label(for='threadTitle') Name
+                  input#threadTitle.form-control(type='text' placeholder='Enter title' autofocus='' v-model='name')
+              .modal-footer
+                button.btn.btn-light(type='button' data-dismiss='modal') Cancel
+                button.btn.btn-primary(type='button' data-dismiss='modal' v-on:click='addChatroom') Create
+
+      // chat
+      #chatModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='threadModalLabel' aria-hidden='true')
+        .modal-dialog.modal-lg(role='document')
+          .modal-content
+            form
+              .modal-header.d-flex.align-items-center.bg-primary.text-white
+                h6#threadModalLabel.modal-title.mb-0 Messages
+                button.close(type='button' data-dismiss='modal' aria-label='Close')
+                  span(aria-hidden='true') &times;
+              .modal-body
+                .form-group
+                  label(for='threadTitle') Chat 
+                  input#threadTitle.form-control(type='text' placeholder='messages' autofocus='' v-model='msg.body' v-on:inpuy='typing()')
+                  input(type='hidden'  v-model='msg.clasroomId' name='clasroomId')
+              .modal-footer
+                button.btn.btn-light(type='button' data-dismiss='modal') Cancel
+                button.btn.btn-primary(type='button' data-dismiss='modal' v-on:click='sendMsg()') send
+
+script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js' integrity='sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN' crossorigin='anonymous')
+script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js' integrity='sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q' crossorigin='anonymous')
+script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js' integrity='sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl' crossorigin='anonymous')
+script(src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js')
+script(type='text/javascript' src='https://cdn.socket.io/socket.io-1.4.5.js')
+script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js')
+script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js')
+script(src='/js/main.js')

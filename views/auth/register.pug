@@ -8,21 +8,15 @@ head
   link(rel='stylesheet' href='/style/main.css')
   script(src='https://cdn.jsdelivr.net/npm/vue/dist/vue.js')
   script(type='text/javascript' src='https://cdn.socket.io/socket.io-1.4.5.js')
-#app.container
+.container
   .row
-    .col-md-6.offset-md-3.col-sm-12
-      h1.text-center {{ title }}
-      br
-      #status
-      #chat
-        input#username.form-control(type='text' v-model='name' placeholder='Enter name...')
-        br
-        .card
-          #messages.card-block
-            ul
-              li(v-for='message of messages') {{ message.name }}: {{ message.text }}
-        br
-        textarea#textarea.form-control(v-model='text' placeholder='Enter message...')
-        br
-        button#send.btn(@click.prevent='sendMessage') Send
-script(src='/js/main.js')
+    .col-md-5
+      .card
+        form.box(method='POST', action='/users/register')
+          h1 Register
+          p.text-muted Register
+          input(type='text', name='username', placeholder='Username')
+
+          input(type='password', name='password', placeholder='Password')
+
+          input(type='submit', name='', value='Login', href='#')
