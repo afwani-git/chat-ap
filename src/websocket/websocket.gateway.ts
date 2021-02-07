@@ -8,14 +8,12 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import { WebsocketService } from './websocket.service';
 import { ChatroomService } from '../chatroom/chatroom.service';
 
 @WebSocketGateway()
 export class WebsocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
-    private websocketService: WebsocketService,
     private chatroomService: ChatroomService,
   ) {}
 
@@ -41,6 +39,12 @@ export class WebsocketGateway
     );
 
     this.server.emit('addChatClient', chat);
+  }
+
+  @SubscribeMessage('typing')
+  async handleTyping(client: Socket, payload: { username: string, currentRoom: string }): Promise<void> {
+
+    this.server.emit('typingResponse', payload);
   }
 
   //loging (_server: Server)

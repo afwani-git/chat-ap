@@ -45,6 +45,7 @@ head
         .inner-main
           // Inner main header
           .inner-main-header
+            p {{ isTypingAction(isTyping) }}
           // /end Inner main header
 
 
@@ -57,7 +58,7 @@ head
               .card-body.p-2.p-sm-3
                 .media.forum-item
                   a(href='#' data-toggle='collapse' data-target='.forum-content')
-                    img.mr-3.rounded-circle(src='https://bootdey.com/img/Content/avatar/avatar1.png' width='50' alt='User')
+                    img.mr-3.rounded-circle( v-bind:src="'https://robohash.org/'+chat.user.id+'?gravatar=hashed'" width='50' alt='User')
                   .media-body
                     .name.d-flex.justify-content-between(style='width: 100%')
                       h6

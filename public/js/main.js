@@ -10,10 +10,20 @@ const app = new Vue({
       body: '',
     },
     chats: [],
+    typingList: [],
+    isTyping: '',
+  },
+  watch: {
+    'msg.body': function () {
+      this.socket.emit('typing', {
+        username: this.currentUser.username,
+        currentRoom: this.currentRoom,
+      });
+    },
   },
   methods: {
-    moment: function(date){
-      return moment(date).fromNow()
+    moment: function (date) {
+      return moment(date).fromNow();
     },
     addChatroom: function () {
       this.socket.emit('addChatRoom', this.name);
@@ -32,6 +42,13 @@ const app = new Vue({
 
       this.socket.emit('addChat', { userId, chatroomId, body });
     },
+    isTypingAction: function (data) {
+      const name = this.typingList[this.currentRoom];
+
+      if (data && name) {
+        return `${name} is typing... .. . .`;
+      }
+    },
   },
   mounted() {
     axios.get('/chatroom/api').then((resp) => {
@@ -47,13 +64,22 @@ const app = new Vue({
   created() {
     this.socket = io('http://localhost:3000');
 
+    this.socket.on('typingResponse', (data) => {
+      this.typingList[data.currentRoom] = data.username;
+
+      this.isTyping = true;
+
+      setTimeout(() => {
+        this.isTyping = false;
+      }, 1000);
+    });
+
     this.socket.on('addChatRoomClient', (data) => {
       data.chats = [];
       this.chatrooms.push(data);
     });
 
     this.socket.on('addChatClient', (data) => {
-
       this.chatrooms.map((chatroom) => {
         if (data.chatroom.id == chatroom.id) {
           const chat = {

@@ -1,4 +1,5 @@
-import { Entity, BaseEntity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
+import { hash, genSalt, compare } from 'bcrypt';
 
 @Entity('users')
 export class User extends BaseEntity {
