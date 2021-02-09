@@ -11,6 +11,7 @@ const app = new Vue({
     },
     chats: [],
     isTyping: '',
+    inRooms: null,
   },
   watch: {
     'msg.body': function () {
@@ -63,15 +64,21 @@ const app = new Vue({
 
     this.socket.on('joinedRoom', (data) => {
       console.log('joinde ' + data);
+      this.socket.emit('clientInRoom', this.currentRoom);
     });
 
     this.socket.on('leavedRoom', (data) => {
       console.log('leaved' + data);
+      this.socket.emit('clientInRoom', this.currentRoom);
+    });
+
+    this.socket.on('clientInRoomRespone', (data) => {
+      if (this.currentRoom == data.currentRoomId) {
+        this.inRooms = data.data.length;
+      }
     });
 
     this.socket.on('typingResponse', (data) => {
-      console.log(data);
-      console.log('helo');
       this.isTyping = data.username + ' is typing.... .';
       this.socket.emit('stopTyping', data);
     });

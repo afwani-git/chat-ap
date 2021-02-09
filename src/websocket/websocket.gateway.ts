@@ -49,8 +49,6 @@ export class WebsocketGateway
     client: Socket, 
     payload: { username: string, currentRoom: string }
   ): Promise<void> {
-    console.log(payload);
-    console.log(`rooms-${payload.currentRoom}`);
     this.server.to(`rooms-${payload.currentRoom}`).emit('typingResponse', payload);
   }
   
@@ -59,8 +57,6 @@ export class WebsocketGateway
     client: Socket, 
     payload: { username: string, currentRoom: string }
   ): Promise<void> {
-    console.log(payload);
-    console.log(`rooms-${payload.currentRoom}`);
     this.server.to(`rooms-${payload.currentRoom}`).emit('stopTypingResponse', payload);
   }
 
@@ -69,9 +65,9 @@ export class WebsocketGateway
     client: Socket, 
     payload: string 
   ): Promise<void> {
-    client.join(`rooms-${payload}`);
-    console.log(client.nsp['/'].adapter.rooms);
-    client.to(payload).emit('clientInRoomRespone', payload);
+    const nameRoom = `rooms-${payload}`;
+    const data = client.nsp.adapter.rooms[nameRoom];
+    this.server.emit('clientInRoomRespone', { data, currentRoomId: payload });
   }
 
   //handle room
@@ -80,9 +76,8 @@ export class WebsocketGateway
     client: Socket, 
     payload: string 
   ): Promise<void> {
-    console.log('joinde'+payload);
     client.join(`rooms-${payload}`);
-    client.emit('joinedRoom', payload);
+    this.server.emit('joinedRoom', payload);
   }
 
   @SubscribeMessage('leaveRoom')
@@ -91,7 +86,7 @@ export class WebsocketGateway
     payload: string
   ): Promise<void> {
     client.leave(`rooms-${payload}`);
-    client.emit('leavedRoom', payload);
+    this.server.emit('leavedRoom', payload);
   }
 
   //loging (_server: Server)

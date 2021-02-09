@@ -224,3 +224,13 @@ body {
 .btn.btn-success.chat > .far.fa-comment {
   font-size: 30px;
 }
+
+.status {
+  margin: 0;
+  color: red;
+}
+
+.status span {
+  color: green;
+}
+
