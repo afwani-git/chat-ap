@@ -5,6 +5,7 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  ConnectedSocket
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
@@ -21,7 +22,9 @@ export class WebsocketGateway
   private logger: Logger = new Logger('AppGateway');
 
   @SubscribeMessage('addChatRoom')
-  async addChatRoom(client: Socket, payload: string): Promise<void> {
+  async addChatRoom(
+    client: Socket, 
+    payload: string): Promise<void> {
     const chatroom = await this.chatroomService.addChatRoom(payload);
 
     this.server.emit('addChatRoomClient', chatroom);
@@ -42,9 +45,53 @@ export class WebsocketGateway
   }
 
   @SubscribeMessage('typing')
-  async handleTyping(client: Socket, payload: { username: string, currentRoom: string }): Promise<void> {
+  async handleTyping(
+    client: Socket, 
+    payload: { username: string, currentRoom: string }
+  ): Promise<void> {
+    console.log(payload);
+    console.log(`rooms-${payload.currentRoom}`);
+    this.server.to(`rooms-${payload.currentRoom}`).emit('typingResponse', payload);
+  }
+  
+  @SubscribeMessage('stopTyping')
+  async handleStopTyping(
+    client: Socket, 
+    payload: { username: string, currentRoom: string }
+  ): Promise<void> {
+    console.log(payload);
+    console.log(`rooms-${payload.currentRoom}`);
+    this.server.to(`rooms-${payload.currentRoom}`).emit('stopTypingResponse', payload);
+  }
 
-    this.server.emit('typingResponse', payload);
+  @SubscribeMessage('clientInRoom')
+  async handleClientInRoom(
+    client: Socket, 
+    payload: string 
+  ): Promise<void> {
+    client.join(`rooms-${payload}`);
+    console.log(client.nsp['/'].adapter.rooms);
+    client.to(payload).emit('clientInRoomRespone', payload);
+  }
+
+  //handle room
+  @SubscribeMessage('joinRoom')
+  async handleJoinRoom(
+    client: Socket, 
+    payload: string 
+  ): Promise<void> {
+    console.log('joinde'+payload);
+    client.join(`rooms-${payload}`);
+    client.emit('joinedRoom', payload);
+  }
+
+  @SubscribeMessage('leaveRoom')
+  async handlerLeaveRoom(
+    client: Socket, 
+    payload: string
+  ): Promise<void> {
+    client.leave(`rooms-${payload}`);
+    client.emit('leavedRoom', payload);
   }
 
   //loging (_server: Server)

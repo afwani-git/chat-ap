@@ -10,7 +10,6 @@ const app = new Vue({
       body: '',
     },
     chats: [],
-    typingList: [],
     isTyping: '',
   },
   watch: {
@@ -33,7 +32,10 @@ const app = new Vue({
     selectChatroom: function (id) {
       const selectedRoom = this.chatrooms.filter((data) => data.id == id)[0];
       this.chats = selectedRoom.chats;
+      this.socket.emit('leaveRoom', this.currentRoom);
       this.currentRoom = selectedRoom.id;
+      this.socket.emit('joinRoom', this.currentRoom);
+      this.socket.emit('clientInRoom', this.currentRoom);
     },
     sendMsg: function () {
       const chatroomId = this.currentRoom;
@@ -42,19 +44,14 @@ const app = new Vue({
 
       this.socket.emit('addChat', { userId, chatroomId, body });
     },
-    isTypingAction: function (data) {
-      const name = this.typingList[this.currentRoom];
-
-      if (data && name) {
-        return `${name} is typing... .. . .`;
-      }
-    },
   },
   mounted() {
     axios.get('/chatroom/api').then((resp) => {
       this.chatrooms = resp.data.chatroom;
       this.currentRoom = resp.data.chatroom[0].id;
       this.chats = resp.data.chatroom[0].chats;
+      this.socket.emit('joinRoom', this.currentRoom);
+      this.socket.emit('clientInRoom', this.currentRoom);
     });
 
     axios.get('/auth').then((resp) => {
@@ -64,13 +61,24 @@ const app = new Vue({
   created() {
     this.socket = io('http://localhost:3000');
 
+    this.socket.on('joinedRoom', (data) => {
+      console.log('joinde ' + data);
+    });
+
+    this.socket.on('leavedRoom', (data) => {
+      console.log('leaved' + data);
+    });
+
     this.socket.on('typingResponse', (data) => {
-      this.typingList[data.currentRoom] = data.username;
+      console.log(data);
+      console.log('helo');
+      this.isTyping = data.username + ' is typing.... .';
+      this.socket.emit('stopTyping', data);
+    });
 
-      this.isTyping = true;
-
+    this.socket.on('stopTypingResponse', (data) => {
       setTimeout(() => {
-        this.isTyping = false;
+        this.isTyping = '';
       }, 1000);
     });
 
