@@ -63,12 +63,10 @@ const app = new Vue({
     this.socket = io('http://localhost:3000');
 
     this.socket.on('joinedRoom', (data) => {
-      console.log('joinde ' + data);
       this.socket.emit('clientInRoom', this.currentRoom);
     });
 
     this.socket.on('leavedRoom', (data) => {
-      console.log('leaved' + data);
       this.socket.emit('clientInRoom', this.currentRoom);
     });
 
